@@ -1,8 +1,12 @@
 import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three/src/Three.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import { type SceneCube, useSceneStore } from '../store/sceneStore';
+
+type OrbitControlsWithLifecycle = OrbitControls & {
+  disconnect(): void;
+};
 
 function disposeMaterial(material: THREE.Material | THREE.Material[]) {
   if (Array.isArray(material)) {
@@ -79,7 +83,10 @@ export function ThreeStage() {
     renderer.domElement.style.touchAction = 'none';
     mountElement.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(
+      camera,
+      renderer.domElement,
+    ) as OrbitControlsWithLifecycle;
     controls.enableDamping = true;
     controls.enablePan = true;
     controls.enableRotate = true;
@@ -198,7 +205,7 @@ export function ThreeStage() {
       renderer.domElement.removeEventListener('pointermove', handlePointerMove);
       renderer.domElement.removeEventListener('pointerup', handlePointerUp);
       renderer.setAnimationLoop(null);
-      controls.dispose();
+      controls.disconnect();
       clearCubeGroup(cubeGroup);
       cubeGroupRef.current = null;
 
