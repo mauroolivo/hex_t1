@@ -8,16 +8,27 @@ type OrbitControlsWithLifecycle = OrbitControls & {
   disconnect(): void;
 };
 
+const textureLoader = new THREE.TextureLoader();
+
+function disposeMaterialEntry(material: THREE.Material) {
+  const materialWithMap = material as THREE.Material & {
+    map?: THREE.Texture | null;
+  };
+
+  materialWithMap.map?.dispose();
+  material.dispose();
+}
+
 function disposeMaterial(material: THREE.Material | THREE.Material[]) {
   if (Array.isArray(material)) {
     material.forEach((entry) => {
-      entry.dispose();
+      disposeMaterialEntry(entry);
     });
 
     return;
   }
 
-  material.dispose();
+  disposeMaterialEntry(material);
 }
 
 function clearCubeGroup(group: THREE.Group) {
@@ -33,11 +44,21 @@ function clearCubeGroup(group: THREE.Group) {
 
 function buildCubeMesh(cube: SceneCube) {
   const geometry = new THREE.BoxGeometry(cube.size, cube.size, cube.size);
+  const texture = cube.textureUrl
+    ? textureLoader.load(cube.textureUrl, (loadedTexture) => {
+        loadedTexture.colorSpace = THREE.SRGBColorSpace;
+      })
+    : null;
   const material = new THREE.MeshStandardMaterial({
-    color: cube.color,
+    color: texture ? '#ffffff' : cube.color,
+    map: texture,
     roughness: 0.45,
     metalness: 0.08,
   });
+
+  if (texture) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+  }
 
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(...cube.position);

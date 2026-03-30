@@ -4,6 +4,7 @@ type SceneCube = {
   id: string;
   size: number;
   color: string;
+  textureUrl?: string;
   position: [number, number, number];
 };
 
@@ -12,6 +13,7 @@ type SceneState = {
   cubeSize: number;
   setCubeSize: (size: number) => void;
   addCubeAtPoint: (x: number, z: number) => void;
+  applyTextureToLatestCube: (textureUrl: string) => boolean;
   clearCubes: () => void;
 };
 
@@ -25,7 +27,7 @@ function clampCubeSize(size: number) {
   return Math.min(4, Math.max(0.5, Number(size.toFixed(2))));
 }
 
-export const useSceneStore = create<SceneState>((set) => ({
+export const useSceneStore = create<SceneState>((set, get) => ({
   cubes: [],
   cubeSize: 1,
   setCubeSize: (size) => {
@@ -47,6 +49,30 @@ export const useSceneStore = create<SceneState>((set) => ({
         ],
       };
     });
+  },
+  applyTextureToLatestCube: (textureUrl) => {
+    const cubes = get().cubes;
+
+    if (cubes.length === 0) {
+      return false;
+    }
+
+    const latestCubeIndex = cubes.length - 1;
+
+    set({
+      cubes: cubes.map((cube, index) => {
+        if (index !== latestCubeIndex) {
+          return cube;
+        }
+
+        return {
+          ...cube,
+          textureUrl,
+        };
+      }),
+    });
+
+    return true;
   },
   clearCubes: () => {
     set({ cubes: [] });
