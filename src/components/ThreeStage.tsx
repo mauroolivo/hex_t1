@@ -85,7 +85,7 @@ export function ThreeStage() {
 
     const controls = new OrbitControls(
       camera,
-      renderer.domElement,
+      renderer.domElement
     ) as OrbitControlsWithLifecycle;
     controls.enableDamping = true;
     controls.enablePan = true;
