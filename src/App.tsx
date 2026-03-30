@@ -90,6 +90,9 @@ export default function App() {
               <div className="text-xs tracking-[0.25em] text-emerald-300/90 uppercase">
                 Orbit: rotate, pan, zoom
               </div>
+              <p className="text-[11px] leading-5 text-white/72">
+                Click-drag to rotate. Cmd-click-drag to pan. Wheel to zoom.
+              </p>
             </div>
           </div>
         </div>
