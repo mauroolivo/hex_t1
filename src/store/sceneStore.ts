@@ -17,7 +17,7 @@ type SceneState = {
   clearCubes: () => void;
 };
 
-const CUBE_COLORS = ['#0f766e', '#d97706', '#c2410c', '#2563eb', '#7c3aed'];
+const CUBE_COLORS = ['#0e7490', '#166534', '#9d174d', '#3730a3', '#475569'];
 
 function clampCubeSize(size: number) {
   if (!Number.isFinite(size)) {

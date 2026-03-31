@@ -8,6 +8,8 @@ type OrbitControlsWithLifecycle = OrbitControls & {
   disconnect(): void;
 };
 
+type CubeMesh = THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
+
 const textureLoader = new THREE.TextureLoader();
 
 function disposeMaterialEntry(material: THREE.Material) {
@@ -42,29 +44,70 @@ function clearCubeGroup(group: THREE.Group) {
   group.clear();
 }
 
-function buildCubeMesh(cube: SceneCube) {
-  const geometry = new THREE.BoxGeometry(cube.size, cube.size, cube.size);
+function buildCubeGeometry(size: number) {
+  return new THREE.BoxGeometry(size, size, size);
+}
+
+function buildCubeMaterial(cube: SceneCube) {
   const texture = cube.textureUrl
     ? textureLoader.load(cube.textureUrl, (loadedTexture) => {
         loadedTexture.colorSpace = THREE.SRGBColorSpace;
       })
     : null;
-  const material = new THREE.MeshStandardMaterial({
-    color: texture ? '#ffffff' : cube.color,
-    map: texture,
-    roughness: 0.45,
-    metalness: 0.08,
-  });
 
   if (texture) {
     texture.colorSpace = THREE.SRGBColorSpace;
   }
 
-  const mesh = new THREE.Mesh(geometry, material);
+  return new THREE.MeshStandardMaterial({
+    color: texture ? '#ffffff' : cube.color,
+    map: texture,
+    roughness: 0.45,
+    metalness: 0.08,
+  });
+}
+
+function applyCubeMeshState(mesh: CubeMesh, cube: SceneCube) {
   mesh.position.set(...cube.position);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   mesh.userData['cubeId'] = cube.id;
+  mesh.userData['cubeSize'] = cube.size;
+  mesh.userData['cubeColor'] = cube.color;
+  mesh.userData['cubeTextureUrl'] = cube.textureUrl ?? null;
+}
+
+function buildCubeMesh(cube: SceneCube) {
+  const mesh = new THREE.Mesh(
+    buildCubeGeometry(cube.size),
+    buildCubeMaterial(cube)
+  ) as CubeMesh;
+
+  applyCubeMeshState(mesh, cube);
+
+  return mesh;
+}
+
+function updateCubeMesh(mesh: CubeMesh, cube: SceneCube) {
+  const previousSize = mesh.userData['cubeSize'] as number | undefined;
+  const previousColor = mesh.userData['cubeColor'] as string | undefined;
+  const previousTextureUrl = mesh.userData['cubeTextureUrl'] as
+    | string
+    | null
+    | undefined;
+  const nextTextureUrl = cube.textureUrl ?? null;
+
+  if (previousSize !== cube.size) {
+    mesh.geometry.dispose();
+    mesh.geometry = buildCubeGeometry(cube.size);
+  }
+
+  if (previousColor !== cube.color || previousTextureUrl !== nextTextureUrl) {
+    disposeMaterial(mesh.material);
+    mesh.material = buildCubeMaterial(cube);
+  }
+
+  applyCubeMeshState(mesh, cube);
 
   return mesh;
 }
@@ -72,10 +115,12 @@ function buildCubeMesh(cube: SceneCube) {
 export function ThreeStage() {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const cubeGroupRef = useRef<THREE.Group | null>(null);
+  const cubeMeshesRef = useRef<Map<string, CubeMesh>>(new Map());
   const cubes = useSceneStore((state) => state.cubes);
 
   useEffect(() => {
     const mountElement = mountRef.current;
+    const cubeMeshes = cubeMeshesRef.current;
 
     if (!mountElement) {
       return undefined;
@@ -83,7 +128,7 @@ export function ThreeStage() {
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#d8e1d9');
-    scene.fog = new THREE.Fog('#d8e1d9', 30, 65);
+    // scene.fog = new THREE.Fog('#d8e1d9', 30, 65);
 
     const camera = new THREE.PerspectiveCamera(
       52,
@@ -228,6 +273,7 @@ export function ThreeStage() {
       renderer.setAnimationLoop(null);
       controls.disconnect();
       clearCubeGroup(cubeGroup);
+      cubeMeshes.clear();
       cubeGroupRef.current = null;
 
       (floor.material as THREE.Material).dispose();
@@ -241,14 +287,38 @@ export function ThreeStage() {
 
   useEffect(() => {
     const cubeGroup = cubeGroupRef.current;
+    const cubeMeshes = cubeMeshesRef.current;
 
     if (!cubeGroup) {
       return;
     }
 
-    clearCubeGroup(cubeGroup);
+    const nextCubeIds = new Set(cubes.map((cube) => cube.id));
+
+    cubeMeshes.forEach((mesh, cubeId) => {
+      if (nextCubeIds.has(cubeId)) {
+        return;
+      }
+
+      cubeGroup.remove(mesh);
+      mesh.geometry.dispose();
+      disposeMaterial(mesh.material);
+      cubeMeshes.delete(cubeId);
+    });
+
     cubes.forEach((cube) => {
-      cubeGroup.add(buildCubeMesh(cube));
+      const existingMesh = cubeMeshes.get(cube.id);
+
+      if (existingMesh) {
+        updateCubeMesh(existingMesh, cube);
+
+        return;
+      }
+
+      const nextMesh = buildCubeMesh(cube);
+
+      cubeMeshes.set(cube.id, nextMesh);
+      cubeGroup.add(nextMesh);
     });
   }, [cubes]);
 
