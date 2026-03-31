@@ -22,8 +22,6 @@ function SampleVideoCard({
   frameStatus,
   frameStatusCopy,
   hasExtractedFrame,
-  isVideoPlayerOpen,
-  onClosePlayer,
   onDownload,
   onExtractFrame,
   textureStatusCopy,
