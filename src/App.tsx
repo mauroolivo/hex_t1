@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react';
+
 import { SceneControlsPanel } from './components/SceneControlsPanel';
-import { ThreeStage } from './components/ThreeStage';
 import { ExtractedFramePreview } from './features/video/ExtractedFramePreview';
 import { VideoPlayerOverlay } from './features/video/VideoPlayerOverlay';
 import { useSampleVideo } from './features/video/useSampleVideo';
 import { useSceneStore } from './store/sceneStore';
+
+const LazyThreeStage = lazy(() => import('./components/ThreeStage'));
 
 export default function App() {
   const cubeCount = useSceneStore((state) => state.cubes.length);
@@ -33,7 +36,15 @@ export default function App() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,#f5f8f2_0%,#d7e0d7_42%,#9eb0aa_100%)] text-slate-900">
-      <ThreeStage />
+      <Suspense
+        fallback={
+          <div className="absolute inset-0">
+            <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent_44%)]" />
+          </div>
+        }
+      >
+        <LazyThreeStage />
+      </Suspense>
 
       <ExtractedFramePreview
         extractedFrame={extractedFrame}
