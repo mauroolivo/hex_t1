@@ -4,7 +4,7 @@ import { PerspectiveCamera } from 'three/src/cameras/PerspectiveCamera.js';
 import { Raycaster } from 'three/src/core/Raycaster.js';
 import {
   ACESFilmicToneMapping,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   SRGBColorSpace,
 } from 'three/src/constants.js';
 import { BoxGeometry } from 'three/src/geometries/BoxGeometry.js';
@@ -161,7 +161,7 @@ function ThreeStage() {
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = PCFSoftShadowMap;
+    renderer.shadowMap.type = PCFShadowMap;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(mountElement.clientWidth, mountElement.clientHeight);
     renderer.domElement.style.touchAction = 'none';
