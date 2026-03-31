@@ -41,14 +41,13 @@ function SceneControlsPanel({
     <section className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center p-4 sm:justify-start sm:p-6">
       <div className="pointer-events-auto max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-4xl border border-white/55 bg-white/72 p-5 shadow-[0_32px_90px_-36px_rgba(15,23,42,0.6)] backdrop-blur-xl sm:max-h-[calc(100vh-3rem)] sm:p-6">
         <p className="text-xs font-semibold tracking-[0.35em] text-slate-500 uppercase">
-          Hexagon Lab
+          Hex Lab
         </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+        <h1 className="mt-3 text-xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
           Three.js cube stage
         </h1>
         <p className="mt-3 max-w-sm text-sm leading-6 text-slate-600">
-          Click the grid to place cubes. Keep the size at 1 for fixed cubes, or
-          set any custom size before placing the next one.
+          Click the grid to place cubes.
         </p>
 
         <div className="mt-6 grid gap-4">

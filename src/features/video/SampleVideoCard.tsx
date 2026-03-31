@@ -80,15 +80,6 @@ function SampleVideoCard({
         >
           {extractLabel}
         </button>
-        {isVideoPlayerOpen ? (
-          <button
-            className="rounded-2xl border border-slate-300 bg-white/85 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-white sm:col-span-2"
-            type="button"
-            onClick={onClosePlayer}
-          >
-            Hide player
-          </button>
-        ) : null}
       </div>
 
       <div className="grid gap-2 rounded-2xl bg-white/70 px-3 py-3 text-xs leading-5 text-slate-600 shadow-inner shadow-white/50">
@@ -97,16 +88,6 @@ function SampleVideoCard({
         <span>{textureStatusCopy}</span>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs leading-5 text-slate-600">
-        <a
-          className="font-semibold text-emerald-800 underline decoration-emerald-300 underline-offset-4 transition hover:text-emerald-700"
-          href={SAMPLE_VIDEO.sourcePageUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Source details
-        </a>
-      </div>
     </div>
   );
 }
